@@ -8,6 +8,10 @@ on:
       message:
         description: 'Tag message'
         required: false
+      publish_args:
+        description: 'Extra args for cargo publish'
+        required: false
+        default: --dry-run
 
 name: Release
 
@@ -24,10 +28,17 @@ jobs:
         with:
           command: semver-checks
           args: check-release -p ${{ inputs.crate }}
-      - run: |
-          version=$(extract-version ${{inputs.crate}})
+      - name: cargo publish
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: -p ${{ inputs.crate }} ${ inputs.publish_args }
+      - name: tag release
+        run: |
+          version=$(extract-crate-version ${{inputs.crate}})
           if [[ "${{ inputs.message }}" ]]; then
             git tag -a -m "${{ inputs.message }}" v${version}
           else
             git tag -a -m "Version ${version}" v${version}
           fi
+          git push --tags
