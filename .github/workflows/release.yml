@@ -36,6 +36,8 @@ jobs:
       - name: tag release
         run: |
           version=$(extract-crate-version ${{inputs.crate}})
+          git config user.name "GitHub Runner"
+          git config user.name github-runner@ngrok.com
           if [[ "${{ inputs.message }}" ]]; then
             git tag -a -m "${{ inputs.message }}" v${version}
           else
