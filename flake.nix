@@ -93,6 +93,10 @@
               --prefix PATH : ${cargo}/bin
           '';
         };
+        extract-version = with pkgs; writeShellScriptBin "extract-crate-version" ''
+          ${cargo}/bin/cargo metadata --format-version 1 --no-deps | \
+            ${jq}/bin/jq -r ".packages[] | select(.name == \"$1\") | .version"
+        '';
       in
       {
         devShell = pkgs.mkShell {
@@ -106,6 +110,7 @@
             setup-hooks
             cargo-udeps
             semver-checks
+            extract-version
           ] ++ lib.optionals stdenv.isDarwin [
             # nix darwin stdenv has broken libiconv: https://github.com/NixOS/nixpkgs/issues/158331
             libiconv
