@@ -5,6 +5,9 @@ on:
         description: 'Crate to release'
         required: true
         default: 'ngrok'
+      message:
+        description: 'Tag message'
+        required: false
 
 name: Release
 
@@ -17,6 +20,14 @@ jobs:
       - uses: cachix/install-nix-action@v18
       - uses: jrobsonchase/direnv-action@v0.6
       - uses: actions-rs/cargo@v1
+        name: semver checks
         with:
           command: semver-checks
           args: check-release -p ${{ inputs.crate }}
+      - run: |
+          version=$(extract-version ${{inputs.crate}})
+          if [[ "${{ inputs.message }}" ]]; then
+            git tag -a -m "${{ inputs.message }}" v${version}
+          else
+            git tag -a -m "Version ${version}" v${version}
+          fi
