@@ -16,11 +16,11 @@ on:
 name: Release
 
 jobs:
-  udeps:
-    name: Release
+  cargo-publish:
+    name: Cargo Publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      version: ${{ steps.output.outputs.version }}
     steps:
       - uses: actions/checkout@v2
       - uses: cachix/install-nix-action@v18
@@ -35,9 +35,21 @@ jobs:
         with:
           command: publish
           args: -p ${{ inputs.crate }} ${{ inputs.publish_args }}
+      - id: output
+        name: output version
+        run: echo "version=$(extract-crate-version ${{inputs.crate}})" >> $GITHUB_OUTPUT
+
+  git-tag:
+    name: Git Tag
+    runs-on: ubuntu-latest
+    needs: cargo-publish
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v2
       - name: tag release
         run: |
-          version=$(extract-crate-version ${{inputs.crate}})
+          version="${{needs.cargo-publish.outputs.version}}"
           git config user.name "GitHub Action"
           git config user.name github-action@ngrok.com
           if [[ "${{ inputs.message }}" ]]; then
