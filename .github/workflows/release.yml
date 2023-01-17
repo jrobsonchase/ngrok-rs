@@ -8,10 +8,6 @@ on:
       message:
         description: 'Tag message'
         required: false
-      publish_args:
-        description: 'Extra args for cargo publish'
-        required: false
-        default: --dry-run
 
 name: Release
 
@@ -34,7 +30,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: publish
-          args: -p ${{ inputs.crate }} ${{ inputs.publish_args }}
+          args: -p ${{ inputs.crate }} --token ${{secrets.CARGO_REGISTRY_TOKEN}}
       - id: output
         name: output version
         run: echo "version=$(extract-crate-version ${{inputs.crate}})" >> $GITHUB_OUTPUT
@@ -53,8 +49,8 @@ jobs:
           git config user.name "GitHub Action"
           git config user.name github-action@ngrok.com
           if [[ "${{ inputs.message }}" ]]; then
-            git tag -a -m "${{ inputs.message }}" v${version}
+            git tag -a -m "${{ inputs.message }}" ${{inputs.crate}}-v${version}
           else
-            git tag -a -m "Version ${version}" v${version}
+            git tag -a -m "Version ${version}" ${{inputs.crate}}-v${version}
           fi
           git push --tags
