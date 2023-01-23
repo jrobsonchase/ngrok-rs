@@ -47,7 +47,7 @@ jobs:
         run: |
           version="${{needs.cargo-publish.outputs.version}}"
           git config user.name "GitHub Action"
-          git config user.name github-action@ngrok.com
+          git config user.email github-action@ngrok.com
           if [[ "${{ inputs.message }}" ]]; then
             git tag -a -m "${{ inputs.message }}" ${{inputs.crate}}-v${version}
           else
