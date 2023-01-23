@@ -91,7 +91,7 @@ jobs:
           args: check-release -p ${{ matrix.crate }}
 
   dry-publish:
-    name: Cargo Publish
+    name: Dry Publish
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -107,16 +107,14 @@ jobs:
           args: -p ${{ matrix.crate }} --dry-run
 
   cargo-publish:
-    name: Cargo Publish
+    name: Publish
     runs-on: ubuntu-latest
-    if: github.repository == 'ngrok/ngrok-rs'&& github.ref_name == 'main'
+    if: github.repository == 'jrobsonchase/ngrok-rs'&& github.ref_name == 'main'
     strategy:
       matrix:
         crate: [ngrok, muxado]
     continue-on-error: true
     needs: [udeps, fmt, clippy, test-nix, test-stable, semver, dry-publish]
-    outputs:
-      version: ${{ steps.output.outputs.version }}
     permissions:
       contents: write
     steps:
